@@ -1,13 +1,13 @@
 [package]
 name = "process_list"
-version = "0.1.2"
+version = "0.1.3"
 authors = ["mgostIH"]
 edition = "2018"
 description = "Crate for listing the processes open in the OS, usually for retrieving their ID by their name."
 license = "MIT"
 repository = "https://github.com/mgostIH/process_list"
 readme = "README.md"
-documentation = "https://docs.rs/process_list/0.1.2/process_list/index.html"
+documentation = "https://docs.rs/process_list/0.1.3/x86_64-pc-windows-msvc/process_list/"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
