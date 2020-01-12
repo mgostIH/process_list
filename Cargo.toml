@@ -1,0 +1,17 @@
+[package]
+name = "process_list"
+version = "0.1.0"
+authors = ["mgostIH"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+log = {version = "0.4", optional = true}
+
+
+[target.'cfg(windows)'.dependencies]
+winapi = { version = "0.3", features = ["tlhelp32", "winnt", "handleapi"] }
+
+[dev-dependencies]
+env_logger = "0.7.1"
