@@ -3,6 +3,9 @@ name = "process_list"
 version = "0.1.0"
 authors = ["mgostIH"]
 edition = "2018"
+description = "Crate for listing the processes open in the OS, usually for retrieving their ID by their name."
+license = "MIT"
+repository = "https://github.com/mgostIH/process_list"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -15,3 +18,4 @@ winapi = { version = "0.3", features = ["tlhelp32", "winnt", "handleapi"] }
 
 [dev-dependencies]
 env_logger = "0.7.1"
+
