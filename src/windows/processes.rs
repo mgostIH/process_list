@@ -1,5 +1,4 @@
 use std::io;
-use std::str::from_utf8;
 use winapi::shared::minwindef::TRUE;
 use winapi::um::handleapi::INVALID_HANDLE_VALUE;
 use winapi::um::tlhelp32::{
@@ -98,11 +97,7 @@ where
 // We use an explicit lifetime because we are changing a pointer to i8 to a pointer to u8.
 fn get_process_data<'a>(process: &'a PROCESSENTRY32) -> Result<(u32, &'a str), u32> {
     let id = process.th32ProcessID;
-    // This is safe because we are converting a slice to i8 to a slice to u8.
-    let name: &'a [u8] = unsafe {
-        std::slice::from_raw_parts(process.szExeFile.as_ptr().cast(), process.szExeFile.len())
-    };
-    let name = from_utf8(name).map_err(|_| id)?;
+    let name = super::get_winstring(&process.szExeFile).map_err(|_| id)?;
     trace!("get_process_data: id = {}, name = {}", id, name);
     Ok((id, name))
 }
