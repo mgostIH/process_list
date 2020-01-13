@@ -1,12 +1,11 @@
 use std::io;
 use std::str::from_utf8;
 use winapi::shared::minwindef::TRUE;
-use winapi::um::handleapi::{CloseHandle, INVALID_HANDLE_VALUE};
+use winapi::um::handleapi::INVALID_HANDLE_VALUE;
 use winapi::um::tlhelp32::{
     CreateToolhelp32Snapshot, Process32First, Process32Next, PROCESSENTRY32, TH32CS_SNAPPROCESS,
 };
-use winapi::um::winnt::HANDLE;
-
+use super::RAIIHandle;
 
 /// Computes a function for each process found, returns an error if any of the WinAPI failed.
 ///
@@ -106,21 +105,4 @@ fn get_process_data<'a>(process: &'a PROCESSENTRY32) -> Result<(u32, &'a str), u
     let name = from_utf8(name).map_err(|_| id)?;
     trace!("get_process_data: id = {}, name = {}", id, name);
     Ok((id, name))
-}
-
-#[repr(transparent)]
-struct RAIIHandle(pub HANDLE);
-
-impl RAIIHandle {
-    pub fn new(handle: HANDLE) -> RAIIHandle {
-        RAIIHandle(handle)
-    }
-}
-
-impl Drop for RAIIHandle {
-    fn drop(&mut self) {
-        debug!("Calling CloseHandle from the RAIIHandle's drop.");
-        // This never gives problem except when running under a debugger.
-        unsafe { CloseHandle(self.0) };
-    }
 }
