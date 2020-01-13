@@ -1,23 +1,28 @@
+use super::RAIIHandle;
 use std::io;
+use std::path::Path;
 use winapi::shared::minwindef::TRUE;
 use winapi::um::handleapi::INVALID_HANDLE_VALUE;
 use winapi::um::tlhelp32::{
     CreateToolhelp32Snapshot, Process32First, Process32Next, PROCESSENTRY32, TH32CS_SNAPPROCESS,
 };
-use super::RAIIHandle;
 
-/// Computes a function for each process found, returns an error if any of the WinAPI failed.
+/// Computes a function for each process found.
 ///
 /// The function `f` takes the process id and it's name as parameters and can do whatever needed.
 ///
 /// Processes that have an invalid UTF-8 name are ignored and logged in warn level (May change in the future)
 ///
+/// # Returns
+/// This function returns the error if any of the internal WinAPI fails.
+///
 /// # Examples
 /// Printing every process to `stdout`
 /// ```
+/// use std::path::{Path, PathBuf};
 /// use process_list::for_each_process;
-/// fn print_processes(id : u32, name : &str) {
-///     println!("Id: {} --- Name: {}", id, name);
+/// fn print_processes(id : u32, name : &Path) {
+///     println!("Id: {} --- Name: {}", id, name.display());
 /// }
 ///
 /// for_each_process(print_processes).unwrap();
@@ -26,14 +31,15 @@ use super::RAIIHandle;
 /// # Examples
 /// Getting all the processes into a `Vec`
 /// ```
+/// use std::path::{Path, PathBuf};
 /// use process_list::for_each_process;
-/// let mut data : Vec<(u32, String)> = Vec::new();
-/// for_each_process(|id, name| data.push( (id, name.to_string()) )).unwrap();
+/// let mut data : Vec<(u32, PathBuf)> = Vec::new();
+/// for_each_process(|id, name| data.push( (id, name.to_path_buf()) )).unwrap();
 /// // Now `data` holds all the current processes id-name pairs.
 /// ```
 pub fn for_each_process<F>(mut f: F) -> io::Result<()>
 where
-    F: FnMut(u32, &str),
+    F: FnMut(u32, &Path),
 {
     // Safe, we need to interface with WinAPI, there's not particular preconditions for the input.
     let handle = unsafe { CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0) };
@@ -67,7 +73,10 @@ where
     match get_process_data(&pe32) {
         Ok((id, name)) => f(id, name),
         // Don't change the underscore from id
-        Err(_id) => warn!("The process with id {} didn't have an UTF8 valid name.", _id),
+        Err(_id) => warn!(
+            "The process with id {} didn't have an UTF8 valid name.",
+            _id
+        ),
     }
 
     // Cleans back the storage we used to store the process name.
@@ -81,7 +90,10 @@ where
     while unsafe { Process32Next(handle, &mut pe32) } != 0 {
         match get_process_data(&pe32) {
             Ok((id, name)) => f(id, name),
-            Err(_id) => warn!("The process with id {} didn't have an UTF8 valid name.", _id),
+            Err(_id) => warn!(
+                "The process with id {} didn't have an UTF8 valid name.",
+                _id
+            ),
         }
         // Cleans back the storage we used to store the process name.
         trace!("Cleaning back process name.");
@@ -94,10 +106,9 @@ where
     Ok(())
 }
 
-// We use an explicit lifetime because we are changing a pointer to i8 to a pointer to u8.
-fn get_process_data<'a>(process: &'a PROCESSENTRY32) -> Result<(u32, &'a str), u32> {
+fn get_process_data(process: &PROCESSENTRY32) -> Result<(u32, &Path), u32> {
     let id = process.th32ProcessID;
     let name = super::get_winstring(&process.szExeFile).map_err(|_| id)?;
     trace!("get_process_data: id = {}, name = {}", id, name);
-    Ok((id, name))
+    Ok((id, Path::new(name)))
 }

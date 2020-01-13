@@ -1,11 +1,11 @@
-mod processes;
 mod modules;
-pub use processes::for_each_process;
+mod processes;
 pub use modules::for_each_module;
+pub use processes::for_each_process;
 
-use winapi::um::winnt::HANDLE;
-use winapi::um::handleapi::CloseHandle;
 use std::str::{from_utf8, Utf8Error};
+use winapi::um::handleapi::CloseHandle;
+use winapi::um::winnt::HANDLE;
 
 #[repr(transparent)]
 pub(self) struct RAIIHandle(pub HANDLE);
@@ -25,9 +25,7 @@ impl Drop for RAIIHandle {
 }
 
 // This is basically from_utf8 with a "transmute" from &[i8] to &[u8]
-pub(self) fn get_winstring<'a>(data : &[i8]) -> Result<&'a str, Utf8Error>{
-    let name: &'a [u8] = unsafe {
-        std::slice::from_raw_parts(data.as_ptr().cast(), data.len())
-    };
+pub(self) fn get_winstring<'a>(data: &[i8]) -> Result<&'a str, Utf8Error> {
+    let name: &'a [u8] = unsafe { std::slice::from_raw_parts(data.as_ptr().cast(), data.len()) };
     from_utf8(name)
 }
