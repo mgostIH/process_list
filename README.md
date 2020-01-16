@@ -7,10 +7,12 @@ This crate exposes a `for_each_process` function to deal sequentially with every
 ### Example
 Printing every process to `stdout`
 ```Rust
+use std::path::{Path, PathBuf};
 use process_list::for_each_process;
-fn print_processes(id : u32, name : &str) {
-    println!("Id: {} --- Name: {}", id, name);
+fn print_processes(id : u32, name : &Path) {
+    println!("Id: {} --- Name: {}", id, name.display());
 }
+
 for_each_process(print_processes).unwrap();
 ```
 
