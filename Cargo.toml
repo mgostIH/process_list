@@ -8,6 +8,7 @@ license = "MIT"
 repository = "https://github.com/mgostIH/process_list"
 readme = "README.md"
 documentation = "https://docs.rs/process_list/0.2.0/x86_64-pc-windows-msvc/process_list/"
+keywords = ["Windows", "Process"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
